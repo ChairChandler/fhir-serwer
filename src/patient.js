@@ -7,11 +7,17 @@ async function getPatients(amount) {
         }
 
         const res = await client.get('Patient', params)
-        return res.map(v => Object({
-            "id": v.resource.id,
-            "name": v.resource.name[0].given.join(' '),
-            "lastname": v.resource.name[0].family
-        }))
+        const ret = []
+        for(const v of res) {
+            try {
+		ret.push({
+		    "id": v.resource.id,
+		    "name": v.resource.name[0].given.join(' '),
+		    "lastname": v.resource.name[0].family
+		})
+	    } catch(err) {}
+	}
+        return ret;
     } catch (err) {
         console.error(err)
         return null
@@ -20,21 +26,18 @@ async function getPatients(amount) {
 
 async function getPatientInfo(pid) {
     try {
-        const data = await client.get(`Patient/${pid}/$everything`)
+        const patient = await client.get(`Patient/${pid}/$everything`)
 
-        let patient = data.filter(v => v.resource.resourceType === "Patient")[0].resource
+        data = await client.get(`Observation`)
+        let observation = data.filter(v => v.resource.subject.reference.includes(pid))
 
-        let observation = data.filter(v => v.resource.resourceType === "Observation")
-        observation = observation.map(v => { delete v.resource.text; return v.resource })
-
-        const medicationStatement = data.filter(v => v.resource.resourceType === "MedicationStatement")
-        const medication = data.filter(v => v.resource.resourceType === "Medication")
+        data = await client.get(`MedicationRequest`)
+        const medicationRequest = data.filter(v => v.resource.subject.reference.includes(pid))
 
         return {
             "patient": patient,
             "observation": observation,
-            "medicationStatement": medicationStatement,
-            "medication": medication
+            "medicationRequest": medicationRequest //medication w podanym zbiorze danych nie występuje
         }
     } catch (err) {
         console.error(err)

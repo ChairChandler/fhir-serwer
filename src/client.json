@@ -1,3 +1,3 @@
 {
-    "addr": "http://hapi.fhir.org/baseR4"
+    "addr": "http://localhost:8080/baseR4"
 }
