@@ -7,16 +7,11 @@ async function getPatients(amount) {
         }
 
         const res = await client.get('Patient', params)
-        const ret = []
-        for(const v of res) {
-            try {
-		ret.push({
-		    "id": v.resource.id,
-		    "name": v.resource.name[0].given.join(' '),
-		    "lastname": v.resource.name[0].family
-		})
-	    } catch(err) {}
-	}
+        const ret = res.map(v => ({
+            "id": v.resource.id,
+            "name": v.resource.name[0].given.join(' '),
+            "lastname": v.resource.name[0].family
+        }))
         return ret;
     } catch (err) {
         console.error(err)
@@ -34,11 +29,7 @@ async function getPatientInfo(pid) {
         data = await client.get(`MedicationRequest`)
         const medicationRequest = data.filter(v => v.resource.subject.reference.includes(pid))
 
-        return {
-            "patient": patient,
-            "observation": observation,
-            "medicationRequest": medicationRequest //medication w podanym zbiorze danych nie występuje
-        }
+        return {patient, observation, medicationRequest}
     } catch (err) {
         console.error(err)
         return null

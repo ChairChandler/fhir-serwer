@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use((req, res, next) => { // middleware responsible for make union of json body and query params
-    req.query = req.body = Object.assign({}, req.body, req.query)
+    req.query = req.body = {...req.body, ...req.query}
     next()
 })
 
