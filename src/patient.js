@@ -21,15 +21,16 @@ async function getPatients(amount) {
 
 async function getPatientInfo(pid) {
     try {
-        const patient = await client.get(`Patient/${pid}/$everything`)
+        let data = await client.get(`Patient/${pid}/$everything`)
+        const patient = data.filter(v => v.resource.resourceType === 'Patient').map(v => v.resource)[0]
 
         data = await client.get(`Observation`)
-        let observation = data.filter(v => v.resource.subject.reference.includes(pid))
+        let observation = data.filter(v => v.resource.subject.reference.includes(pid)).map(v => v.resource)
 
         data = await client.get(`MedicationRequest`)
-        const medicationRequest = data.filter(v => v.resource.subject.reference.includes(pid))
+        const medicationRequest = data.filter(v => v.resource.subject.reference.includes(pid)).map(v => v.resource)
 
-        return {patient, observation, medicationRequest}
+        return { patient, observation, medicationRequest }
     } catch (err) {
         console.error(err)
         return null

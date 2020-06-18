@@ -7,7 +7,11 @@ class Fhir {
     }
 
     async get(path, query) {
-        let params = ['_format=json'].push(...query.map(k => `${k}=${query[k]}`))
+    
+        let params = ['_format=json']
+        if(query) {
+            params.push(...(query.map(k => `${k}=${query[k]}`)))
+        }
         params = '?' + params.join('&')
         const url = `${this.baseUrl}${path[0] !== '/' ? '/' : ''}${path}${params}`
         return JSON.parse((await needle('get', url)).body.toString()).entry
