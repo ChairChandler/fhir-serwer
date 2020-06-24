@@ -6,15 +6,26 @@ class Fhir {
         this.baseUrl = baseUrl
     }
 
-    async get(path, query) {
-    
+    async* get(path, query) {
+
         let params = ['_format=json']
-        if(query) {
+        if (query) {
             params.push(...(query.map(k => `${k}=${query[k]}`)))
         }
         params = '?' + params.join('&')
-        const url = `${this.baseUrl}${path[0] !== '/' ? '/' : ''}${path}${params}`
-        return JSON.parse((await needle('get', url)).body.toString()).entry
+        let url = `${this.baseUrl}${path[0] !== '/' ? '/' : ''}${path}${params}`
+
+        while(true) {
+            let json = JSON.parse((await needle('get', url)).body.toString())
+            yield json.entry
+            const link = json.link.find(v => v.relation === 'next')
+            if(link) {
+                url = link.url
+            } else {
+                break
+            }
+
+        }
     }
 }
 

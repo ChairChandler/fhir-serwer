@@ -10,12 +10,12 @@ app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use((req, res, next) => { // middleware responsible for make union of json body and query params
-    req.query = req.body = {...req.body, ...req.query}
+    req.query = req.body = { ...req.body, ...req.query }
     next()
 })
 
 app
-    .get('/patients_list', async(req, res) => {
+    .get('/patients_list', async (req, res) => {
         let data
         if (data = await Patient.getPatients(req.query["amount"])) {
             res.status(HttpStatus.OK).send(data)
@@ -23,7 +23,7 @@ app
             res.sendStatus(HttpStatus.INTERNAL_SERVER_ERROR)
         }
     })
-    .get('/patient_info', async(req, res) => {
+    .get('/patient_info', async (req, res) => {
         if (!("pid" in req.query)) {
             res.sendStatus(HttpStatus.BAD_REQUEST)
             return;
